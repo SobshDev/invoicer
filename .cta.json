@@ -1,5 +1,5 @@
 {
-  "projectName": "invoicer",
+  "projectName": "kcal-count",
   "mode": "file-router",
   "typescript": true,
   "tailwind": true,

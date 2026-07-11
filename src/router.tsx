@@ -6,10 +6,15 @@ import { ConvexReactClient } from 'convex/react'
 import { routeTree } from './routeTree.gen'
 
 export function getRouter() {
-  const convexClient = new ConvexReactClient(
-    import.meta.env.VITE_CONVEX_URL ?? 'https://example.convex.cloud',
-    { unsavedChangesWarning: false },
-  )
+  const convexUrl = import.meta.env.VITE_CONVEX_URL
+
+  if (!convexUrl) {
+    throw new Error('Missing VITE_CONVEX_URL in your environment')
+  }
+
+  const convexClient = new ConvexReactClient(convexUrl, {
+    unsavedChangesWarning: false,
+  })
   const convexQueryClient = new ConvexQueryClient(convexClient)
   const queryClient = new QueryClient({
     defaultOptions: {

@@ -4,16 +4,26 @@ import {
   Scripts,
   createRootRouteWithContext,
   useRouteContext,
+  useRouterState,
 } from '@tanstack/react-router'
-import type { QueryClient } from '@tanstack/react-query'
-import { createServerFn } from '@tanstack/react-start'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
-import { ClerkProvider, useAuth } from '@clerk/tanstack-react-start'
+import type { QueryClient } from '@tanstack/react-query'
+import { createServerFn } from '@tanstack/react-start'
+import {
+  ClerkProvider,
+  Show,
+  SignInButton,
+  SignUpButton,
+  UserButton,
+  useAuth,
+} from '@clerk/tanstack-react-start'
 import { auth } from '@clerk/tanstack-react-start/server'
-import { ConvexProviderWithClerk } from 'convex/react-clerk'
-import type { ConvexReactClient } from 'convex/react'
+import { shadcn } from '@clerk/ui/themes'
 import type { ConvexQueryClient } from '@convex-dev/react-query'
+import type { ConvexReactClient } from 'convex/react'
+import { ConvexProviderWithClerk } from 'convex/react-clerk'
+import { Button } from '@/components/ui/button'
 
 import appCss from '../styles.css?url'
 
@@ -37,7 +47,7 @@ export const Route = createRootRouteWithContext<{
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'Invoicer',
+        title: 'Kcal Count',
       },
     ],
     links: [
@@ -61,7 +71,7 @@ function RootComponent() {
   const { convexClient } = useRouteContext({ from: Route.id })
 
   return (
-    <ClerkProvider>
+    <ClerkProvider appearance={{ theme: shadcn }}>
       <ConvexProviderWithClerk client={convexClient} useAuth={useAuth}>
         <RootDocument>
           <Outlet />
@@ -72,12 +82,36 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const isAuthRoute = useRouterState({
+    select: ({ location }) =>
+      location.pathname.startsWith('/sign-in') ||
+      location.pathname.startsWith('/sign-up'),
+  })
+
   return (
     <html lang="en">
       <head>
         <HeadContent />
       </head>
       <body>
+        {!isAuthRoute && (
+          <header className="flex items-center justify-between border-b border-border px-8 py-4">
+            <span className="font-semibold">Kcal Count</span>
+            <Show when="signed-out">
+              <div className="flex items-center gap-2">
+                <SignInButton mode="redirect">
+                  <Button variant="ghost">Sign in</Button>
+                </SignInButton>
+                <SignUpButton mode="redirect">
+                  <Button>Sign up</Button>
+                </SignUpButton>
+              </div>
+            </Show>
+            <Show when="signed-in">
+              <UserButton />
+            </Show>
+          </header>
+        )}
         {children}
         <TanStackDevtools
           config={{
